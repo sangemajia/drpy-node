@@ -1,7 +1,7 @@
 # drpyS(drpy-node)
 
 nodejs作为服务端的drpy实现。全面升级异步写法  
-~~积极开发中，每日一更~~，当前进度 `93%`  
+~~积极开发中，每日一更~~，当前进度 `95%`  
 ~~找工作中，随缘更新~~  
 上班当牛马，下班要带娃，阶段性佛系趁娃睡觉熬夜更新
 
@@ -15,6 +15,7 @@ nodejs作为服务端的drpy实现。全面升级异步写法
 * [猫源调试教程](/docs/catDebug.md)
 * [V我50支付凭证生成器](/authcoder?len=10&number=1)
 * [接口压测教程](/docs/httpTest.md)
+* [AI编程工具 trae](https://www.trae.ai/account-setting#subscription) | 邮编ZIP输入: 518000
 * [本项目主页-免翻](https://git-proxy.playdreamer.cn/hjdhnx/drpy-node)
 * [DS源适配猫影视](https://github.com/hjdhnx/CatPawOpen/tree/ds-cat)
 * [DS插件项目-golang](https://github.com/hjdhnx/drpy-plugin)
@@ -22,6 +23,7 @@ nodejs作为服务端的drpy实现。全面升级异步写法
 * [本站防止爬虫协议](/robots.txt)
 * [油猴脚本-反切屏检测](/public/monkey/check_screen_leave.user.js)
 * [油猴脚本-智能剪切板推送](/public/monkey/clipboard-sender.user.js)
+* [油猴脚本-智能剪切板推送自定义指令集](/public/monkey/自定义指令集-道长.json)
 
 -------------------------
 
@@ -35,6 +37,10 @@ nodejs作为服务端的drpy实现。全面升级异步写法
 * [在线猫ds源主页](/cat/index.html)
 
 ## 更新记录
+
+### 20250906
+
+更新至V1.2.25
 
 ### 20250903
 
@@ -163,7 +169,8 @@ pm2 restart drpys
 * [猫影视git文件加速](https://github.catvod.com/)
 * [猫影视多功能主页](https://catvod.com/)
 * [ZY写源教学](https://zy.catni.cn/editSource/edit-grammar.html)
-* [源动力](https://sourcepower.top/index)
+* [源动力-新](https://tvshare.cn/)
+* [源动力-老](https://sourcepower.top/index)
 
 ## AI接入
 
