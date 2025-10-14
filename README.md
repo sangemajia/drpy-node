@@ -1,5 +1,8 @@
 # drpyS(drpy-node)
 
+[![zread](https://img.shields.io/badge/Ask_Zread-_.svg?style=plastic&color=00b0aa&labelColor=000000&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQuOTYxNTYgMS42MDAxSDIuMjQxNTZDMS44ODgxIDEuNjAwMSAxLjYwMTU2IDEuODg2NjQgMS42MDE1NiAyLjI0MDFWNC45NjAxQzEuNjAxNTYgNS4zMTM1NiAxLjg4ODEgNS42MDAxIDIuMjQxNTYgNS42MDAxSDQuOTYxNTZDNS4zMTUwMiA1LjYwMDEgNS42MDE1NiA1LjMxMzU2IDUuNjAxNTYgNC45NjAxVjIuMjQwMUM1LjYwMTU2IDEuODg2NjQgNS4zMTUwMiAxLjYwMDEgNC45NjE1NiAxLjYwMDFaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00Ljk2MTU2IDEwLjM5OTlIMi4yNDE1NkMxLjg4ODEgMTAuMzk5OSAxLjYwMTU2IDEwLjY4NjQgMS42MDE1NiAxMS4wMzk5VjEzLjc1OTlDMS42MDE1NiAxNC4xMTM0IDEuODg4MSAxNC4zOTk5IDIuMjQxNTYgMTQuMzk5OUg0Ljk2MTU2QzUuMzE1MDIgMTQuMzk5OSA1LjYwMTU2IDE0LjExMzQgNS42MDE1NiAxMy43NTk5VjExLjAzOTlDNS42MDE1NiAxMC42ODY0IDUuMzE1MDIgMTAuMzk5OSA0Ljk2MTU2IDEwLjM5OTlaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik0xMy43NTg0IDEuNjAwMUgxMS4wMzg0QzEwLjY4NSAxLjYwMDEgMTAuMzk4NCAxLjg4NjY0IDEwLjM5ODQgMi4yNDAxVjQuOTYwMUMxMC4zOTg0IDUuMzEzNTYgMTAuNjg1IDUuNjAwMSAxMS4wMzg0IDUuNjAwMUgxMy43NTg0QzE0LjExMTkgNS42MDAxIDE0LjM5ODQgNS4zMTM1NiAxNC4zOTg0IDQuOTYwMVYyLjI0MDFDMTQuMzk4NCAxLjg4NjY0IDE0LjExMTkgMS42MDAxIDEzLjc1ODQgMS42MDAxWiIgZmlsbD0iI2ZmZiIvPgo8cGF0aCBkPSJNNCAxMkwxMiA0TDQgMTJaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00IDEyTDEyIDQiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4K&logoColor=ffffff)](https://zread.ai/hjdhnx/drpy-node)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/hjdhnx/drpy-node)
+
 nodejs作为服务端的drpy实现。全面升级异步写法  
 ~~积极开发中，每日一更~~，当前进度 `99.999999%`  
 ~~找工作中，随缘更新~~  
@@ -54,6 +57,10 @@ nodejs作为服务端的drpy实现。全面升级异步写法
 
 ## 更新记录
 
+### 20251014
+
+更新至V1.3.12
+
 ### 20251013
 
 更新至V1.3.11
@@ -61,57 +68,6 @@ nodejs作为服务端的drpy实现。全面升级异步写法
 ### 20251012
 
 更新至V1.3.10
-
-### 20251010
-
-更新至V1.3.9
-
-### 20251008
-
-更新至V1.3.8
-
-### 20251007
-
-更新至V1.3.7
-
-### 20250927
-
-更新至V1.3.6
-
-### 20250925
-
-更新至V1.3.5
-
-### 20250919
-
-更新至V1.3.4
-
-### 20250918
-
-更新至V1.3.3
-
-### 20250916
-
-更新至V1.3.2
-
-### 20250914
-
-更新至V1.3.1
-
-框架已完成，预留0.1%进度修bug
-
-### 20250913
-
-更新至V1.2.30
-
-### 20250911
-
-更新至V1.2.29
-完美dr2模板源适配
-
-### 20250910
-
-更新至V1.2.28
 
 [点此查看完整更新记录](docs/updateRecord.md)
 
@@ -213,6 +169,7 @@ pm2 restart drpys
 * [ZY写源教学](https://zy.catni.cn/editSource/edit-grammar.html)
 * [源动力-新](https://tvshare.cn/)
 * [源动力-老](https://sourcepower.top/index)
+* [电竞专业反应测试](https://www.arealme.com/brain-memory-game/zh/)
 
 ## AI接入
 
