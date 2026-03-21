@@ -14,7 +14,7 @@ const _config_path = path.join(__dirname, '../config');
 const _lib_path = path.join(__dirname, '../spider/catvod');
 const enable_cat_debug = Number(process.env.CAT_DEBUG) !== 2;
 
-console.log('enable_cat_debug:', enable_cat_debug);
+// console.log('enable_cat_debug:', enable_cat_debug);
 
 const json2Object = function (json) {
     if (!json) {
@@ -146,7 +146,9 @@ const init = async function (filePath, env = {}, refresh) {
         // console.log('globalThis.ENV:', globalThis.ENV);
         // console.log('globalThis.getProxyUrl:', globalThis.getProxyUrl);
         // 加载 init
-        await rule.init(default_init_cfg);
+        if (typeof rule.init === 'function') {
+            await rule.init(default_init_cfg);
+        }
         let t2 = getNowTime();
         const moduleObject = deepCopy(rule);
         moduleObject.cost = t2 - t1;
@@ -184,9 +186,15 @@ const category = async function (filePath, env, tid, pg = 1, filter = 1, extend 
 const detail = async function (filePath, env, ids) {
     const moduleObject = await init(filePath, env);
     const vod_id = Array.isArray(ids) ? ids[0] : ids;
-    return json2Object(await moduleObject.detail(vod_id));
+    let detailResult = '{}';
+    // console.log('type of detailContent:', typeof moduleObject.detailContent);
+    if (moduleObject.detailContent) { // tvbox形式猫源二级参数传ids列表
+        detailResult = await moduleObject.detailContent(ids);
+    } else { // ds/cat传非id
+        detailResult = await moduleObject.detail(vod_id);
+    }
+    return json2Object(detailResult);
 }
-
 
 const search = async function (filePath, env, wd, quick = 0, pg = 1) {
     const moduleObject = await init(filePath, env);

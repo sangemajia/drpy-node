@@ -33,18 +33,22 @@ export function startJsonWatcher(ENGINES, jsonDir) {
 
                 // 设置新的防抖计时器，避免频繁触发
                 const timer = setTimeout(() => {
-                    console.log(`${filename}文件已${eventType}，即将清除所有模块缓存`);
+                    console.log(`[HotReload] ${filename} changed, clearing cache...`);
                     // 清除drpyS引擎的所有缓存
                     ENGINES.drpyS.clearAllCache();
                     // 清理已完成的计时器
                     debounceTimers.delete(filename);
                 }, 100); // 100ms防抖延迟
+                if (timer.unref) timer.unref();
 
                 debounceTimers.set(filename, timer);
             }
         });
 
-        console.log(`start json file hot reload success，listening path: ${jsonDir}`);
+        // 允许监听器不阻止进程退出
+        if (jsonWatcher.unref) jsonWatcher.unref();
+
+        // console.log(`start json file hot reload success，listening path: ${jsonDir}`);
     } catch (error) {
         console.error('start json file listening failed with error:', error);
     }
@@ -73,6 +77,12 @@ export function getApiEngine(engines, moduleName, query, options) {
             apiEngine = engines.hipy;
             moduleDir = options.pyDir;
             _ext = '.py';
+            break;
+        case 'php':
+            // PHP引擎 - php
+            apiEngine = engines.php;
+            moduleDir = options.phpDir;
+            _ext = '.php';
             break;
         case 'cat':
             // CatVod引擎

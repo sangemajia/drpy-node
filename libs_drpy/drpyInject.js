@@ -9,6 +9,9 @@ import _ from './underscore-esm.min.js'
 // import _ from 'underscore'
 import tunnel from "tunnel";
 import iconv from 'iconv-lite';
+globalThis.iconv = iconv;
+import * as cheerio from 'cheerio';
+globalThis.cheerio = cheerio;
 import {jsonpath, jsoup} from './htmlParser.js';
 import hlsParser from './hls-parser.js'
 import {keysToLowerCase} from '../utils/utils.js'
@@ -163,10 +166,10 @@ async function request(url, opt = {}) {
     let effectivePostType = postType;
     if (!effectivePostType) {
         // 查找不区分大小写的 Content-Type 头
-        const contentTypeKey = Object.keys(headers).find(key => 
+        const contentTypeKey = Object.keys(headers).find(key =>
             key.toLowerCase() === 'content-type'
         );
-        
+
         if (contentTypeKey && headers[contentTypeKey]) {
             const contentType = headers[contentTypeKey].toLowerCase();
             if (contentType.includes('application/x-www-form-urlencoded')) {
@@ -176,7 +179,7 @@ async function request(url, opt = {}) {
             }
         }
     }
-    
+
     // 根据有效的 postType 处理数据
     if (effectivePostType === 'form' && data != null && typeof data === 'object') {
         data = qs.stringify(data, {encode: false});
@@ -724,4 +727,58 @@ globalThis.jsonToCookie = jsonToCookie;
 globalThis.cookieToJson = cookieToJson;
 globalThis.keysToLowerCase = keysToLowerCase;
 
+class BaseSpider {
+    constructor() {
+        this.home = this.homeContent;
+        this.category = this.categoryContent;
+        // this.detail = this.detailContent;
+        this.search = this.searchContent;
+        this.play = this.playerContent;
+        this.homeVod = this.homeVideoContent;
+        this.proxy = this.localProxy;
+        // this.fetch = request;
+    }
+
+    async fetch(url, options) {
+        const resp = await req(url, options);
+        return {
+            ...resp,
+            get data() { // data尝试返回object
+                try {
+                    return this.content.parseX;
+                } catch (e) {
+                    return {};
+                }
+            }
+        };
+    }
+
+    async homeContent() {
+    }
+
+    async categoryContent() {
+    }
+
+    async detailContent() {
+    }
+
+    async searchContent() {
+    }
+
+    async playerContent() {
+    }
+
+    async homeVideoContent() {
+    }
+
+    async localProxy() {
+
+    }
+
+    async action() {
+
+    }
+}
+
+globalThis.BaseSpider = BaseSpider;
 export default {};

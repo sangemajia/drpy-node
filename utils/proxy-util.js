@@ -70,7 +70,7 @@ export class SmartCacheManager {
         // 启动定期清理任务
         this.startCleanupTimer();
         
-        console.log(`[${this.name}] SmartCacheManager initialized: maxSize=${this.maxSize}, defaultTTL=${this.defaultTTL}ms`);
+        // console.log(`[${this.name}] SmartCacheManager initialized: maxSize=${this.maxSize}, defaultTTL=${this.defaultTTL}ms`);
     }
     
     /**
@@ -219,6 +219,11 @@ export class SmartCacheManager {
         this.cleanupTimer = setInterval(() => {
             this._performCleanup();
         }, this.cleanupInterval);
+        
+        // 允许进程在定时器存在时退出
+        if (this.cleanupTimer.unref) {
+            this.cleanupTimer.unref();
+        }
         
         // 确保进程退出时清理定时器
         if (typeof process !== 'undefined') {

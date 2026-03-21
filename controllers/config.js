@@ -23,6 +23,7 @@ import {validateBasicAuth, validatePwd} from "../utils/api_validate.js";
 import {getSitesMap} from "../utils/sites-map.js";
 import {getParsesDict} from "../utils/file.js";
 import batchExecute from '../libs_drpy/batchExecute.js';
+import {isPhpAvailable} from '../utils/phpEnv.js';
 
 const {jsEncoder} = drpyS;
 
@@ -54,6 +55,16 @@ function logExt(_ext) {
     return Array.isArray(_ext) || typeof _ext == "object" ? JSON.stringify(_ext) : _ext
 }
 
+function guessRuleType(baseName, ruleObject) {
+    if (baseName.includes('[画]')) {
+        ruleObject.类型 = '漫画'
+    } else if (baseName.includes('[书]')) {
+        ruleObject.类型 = '小说'
+    } else if (baseName.includes('[短]')) {
+        ruleObject.类型 = '短剧'
+    }
+}
+
 /**
  * 生成站点配置JSON数据
  * 扫描各种类型的源文件并生成统一的配置格式
@@ -76,6 +87,7 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
     const jsDir = options.jsDir;
     const dr2Dir = options.dr2Dir;
     const pyDir = options.pyDir;
+    const phpDir = options.phpDir;
     const catDir = options.catDir;
     const configDir = options.configDir;
     const jsonDir = options.jsonDir;
@@ -184,10 +196,12 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                     } catch (e) {
                         throw new Error(`Error parsing rule object for file: ${file}, ${e.message}`);
                     }
+                    guessRuleType(baseName, ruleObject);
                     Object.assign(ruleMeta, {
                         title: ruleObject.title,
                         author: ruleObject.author,
                         类型: ruleObject.类型 || '影视',
+                        mergeList: ruleObject.二级 === '*' || ruleObject.mergeList,
                         searchable: ruleObject.searchable,
                         filterable: ruleObject.filterable,
                         quickSearch: ruleObject.quickSearch,
@@ -195,6 +209,13 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                         logo: ruleObject.logo,
                         lang: 'ds',
                     });
+                    if (ruleMeta.mergeList) {
+                        if (ruleMeta.more && typeof ruleMeta.more === 'object') {
+                            ruleMeta.more.mergeList = 1;
+                        } else {
+                            ruleMeta.more = {mergeList: 1};
+                        }
+                    }
                     // console.log('ds ruleMeta:', ruleMeta);
                     await FileHeaderManager.writeHeader(filePath, ruleMeta);
                 } else {
@@ -287,10 +308,12 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                         } catch (e) {
                             throw new Error(`Error parsing rule object for file: ${file}, ${e.message}`);
                         }
+                        guessRuleType(baseName, ruleObject);
                         Object.assign(ruleMeta, {
                             title: ruleObject.title,
                             author: ruleObject.author,
                             类型: ruleObject.类型 || '影视',
+                            mergeList: ruleObject.二级 === '*' || ruleObject.mergeList,
                             searchable: ruleObject.searchable,
                             filterable: ruleObject.filterable,
                             quickSearch: ruleObject.quickSearch,
@@ -298,6 +321,13 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                             logo: ruleObject.logo,
                             lang: 'dr2',
                         });
+                        if (ruleMeta.mergeList) {
+                            if (ruleMeta.more && typeof ruleMeta.more === 'object') {
+                                ruleMeta.more.mergeList = 1;
+                            } else {
+                                ruleMeta.more = {mergeList: 1};
+                            }
+                        }
                         // console.log('dr2 ruleMeta:', ruleMeta);
                         await FileHeaderManager.writeHeader(filePath, ruleMeta);
                     } else {
@@ -327,9 +357,12 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                     }
 
                     fileSites.forEach((fileSite) => {
-                        if (enable_dr2 === '1') {
+                        if (enable_dr2 === '1' || enable_dr2 === '2') {
                             // dr2ApiType=0 使用接口drpy2 dr2ApiType=1 使用壳子内置的drpy2
                             let api = dr2ApiType ? `assets://js/lib/drpy2.js` : `${requestHost}/public/drpy/drpy2.min.js`;
+                            if (enable_dr2 === '2') {
+                                api = `${requestHost}/public/drpy/drpy2-fast.min.js`;
+                            }
                             let ext = `${requestHost}/js/${file}`;
                             if (pwd) {
                                 ext += `?pwd=${pwd}`;
@@ -348,31 +381,33 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                                 ext: ext || "", // 固定为空字符串
                             };
                             sites.push(site);
-                        } else if (enable_dr2 === '2') {
-                            // 模式2：只启用T3脚本的T4风格API配置
-                            const t4site = {
-                                key: fileSite.key,
-                                name: fileSite.name,
-                                type: 4, // 固定值
-                                api: `${requestHost}/api/${baseName}`,
-                                ...ruleMeta,
-                                ext: "", // 固定为空字符串
-                            };
-                            // 添加isdr2参数到API URL
-                            if (pwd) {
-                                t4site.api += `?pwd=${pwd}&do=dr`;
-                            } else {
-                                t4site.api += `?do=dr`;
-                            }
-
-                            // 处理传参源的API参数
-                            if (fileSite.queryStr) {
-                                const separator = t4site.api.includes('?') ? '&' : '?';
-                                site.api += `${separator}extend=${encodeURIComponent(fileSite.queryStr)}`;
-                            }
-
-                            sites.push(t4site);
                         }
+                        // else if (enable_dr2 === '2') {
+                        //
+                        //     // 模式2：只启用T3脚本的T4风格API配置
+                        //     const t4site = {
+                        //         key: fileSite.key,
+                        //         name: fileSite.name,
+                        //         type: 4, // 固定值
+                        //         api: `${requestHost}/api/${baseName}`,
+                        //         ...ruleMeta,
+                        //         ext: "", // 固定为空字符串
+                        //     };
+                        //     // 添加isdr2参数到API URL
+                        //     if (pwd) {
+                        //         t4site.api += `?pwd=${pwd}&do=dr`;
+                        //     } else {
+                        //         t4site.api += `?do=dr`;
+                        //     }
+                        //
+                        //     // 处理传参源的API参数
+                        //     if (fileSite.queryStr) {
+                        //         const separator = t4site.api.includes('?') ? '&' : '?';
+                        //         site.api += `${separator}extend=${encodeURIComponent(fileSite.queryStr)}`;
+                        //     }
+                        //
+                        //     sites.push(t4site);
+                        // }
                     });
                 },
                 param: {file, dr2Dir, requestHost, pwd, drpyS, SitesMap},
@@ -412,6 +447,7 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                         filterable: 1, // 固定值
                         quickSearch: 1, // 固定值
                     };
+                    guessRuleType(baseName, ruleObject);
                     let ruleMeta = {...ruleObject};
                     const filePath = path.join(pyDir, file);
                     const header = await FileHeaderManager.readHeader(filePath);
@@ -485,6 +521,64 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
         await batchExecute(py_tasks, listener);
 
     }
+
+    // 根据用户是否启用php源去生成对应配置
+    const enable_php = ENV.get('enable_php', '1');
+    console.log('isPhpAvailable:', isPhpAvailable);
+    if ((enable_php === '1' && isPhpAvailable) || enable_php === '2') {
+        const php_files = readdirSync(phpDir);
+        const api_type = enable_php === '2' ? 3 : 4;
+        let php_valid_files = php_files.filter((file) => file.endsWith('.php') && !file.startsWith('_') && !['config.php', 'index.php', 'test_runner.php'].includes(file));
+        log(`开始生成php的T${api_type}配置，phpDir:${phpDir},源数量: ${php_valid_files.length}`);
+
+        const php_tasks = php_valid_files.map((file) => {
+            return {
+                func: async ({file, phpDir, requestHost, pwd, SitesMap}) => {
+                    const baseName = path.basename(file, '.php');
+                    let api = enable_php === '2' ? `${requestHost}/php/${file}` : `${requestHost}/api/${baseName}?do=php`;
+                    let ext = '';
+                    if (pwd) {
+                        api += enable_php === '2' ? `?pwd=${pwd}` : `&pwd=${pwd}`;
+                    }
+                    let ruleObject = {
+                        searchable: 1,
+                        filterable: 1,
+                        quickSearch: 1,
+                    };
+                    guessRuleType(baseName, ruleObject);
+                    let ruleMeta = {...ruleObject};
+                    const filePath = path.join(phpDir, file);
+
+                    Object.assign(ruleMeta, {
+                        title: baseName,
+                        lang: 'php',
+                    });
+                    ruleMeta.title = enableRuleName ? ruleMeta.title || baseName : baseName;
+
+                    let fileSites = [];
+                    let key = `php_${ruleMeta.title}`;
+                    let name = `${ruleMeta.title}(PHP)`;
+                    fileSites.push({key, name, ext});
+
+                    fileSites.forEach((fileSite) => {
+                        const site = {
+                            key: fileSite.key,
+                            name: fileSite.name,
+                            type: api_type,
+                            api,
+                            ...ruleMeta,
+                            ext: fileSite.ext || "",
+                        };
+                        sites.push(site);
+                    });
+                },
+                param: {file, phpDir, requestHost, pwd, SitesMap},
+                id: file,
+            };
+        });
+        await batchExecute(php_tasks, listener);
+    }
+
     const enable_cat = ENV.get('enable_cat', '1');
     // 根据用户是否启用cat源去生成对应配置
     if (enable_cat === '1' || enable_cat === '2') {
@@ -515,6 +609,7 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
                         filterable: 1, // 固定值
                         quickSearch: 1, // 固定值
                     };
+                    guessRuleType(baseName, ruleObject);
                     let ruleMeta = {...ruleObject};
                     const filePath = path.join(catDir, file);
                     const header = await FileHeaderManager.readHeader(filePath);
@@ -655,78 +750,82 @@ async function generateSiteJSON(options, requestHost, sub, pwd) {
  * @returns {Promise<Object>} 包含parses数组的对象
  */
 async function generateParseJSON(jxDir, requestHost) {
-    const files = readdirSync(jxDir);
-    const jx_files = files.filter((file) => file.endsWith('.js') && !file.startsWith('_')) // 筛选出不是 "_" 开头的 .js 文件
-    const jx_dict = getParsesDict(requestHost);
+    let enable_self_jx = ENV.get('enable_self_jx', '0') === '1';
     let parses = [];
-    const tasks = jx_files.map((file) => {
-        return {
-            func: async ({file, jxDir, requestHost, drpyS}) => {
-                const baseName = path.basename(file, '.js'); // 去掉文件扩展名
-                const api = `${requestHost}/parse/${baseName}?url=`;  // 使用请求的 host 地址，避免硬编码端口
+    let sorted_parses = [];
+    const jx_dict = getParsesDict(requestHost);
+    if (enable_self_jx) {
+        const files = readdirSync(jxDir);
+        const jx_files = files.filter((file) => file.endsWith('.js') && !file.startsWith('_')) // 筛选出不是 "_" 开头的 .js 文件
+        const tasks = jx_files.map((file) => {
+            return {
+                func: async ({file, jxDir, requestHost, drpyS}) => {
+                    const baseName = path.basename(file, '.js'); // 去掉文件扩展名
+                    const api = `${requestHost}/parse/${baseName}?url=`;  // 使用请求的 host 地址，避免硬编码端口
 
-                let jxObject = {
-                    type: 1, // 固定值
-                    ext: {
-                        flag: [
-                            "qiyi",
-                            "imgo",
-                            "爱奇艺",
-                            "奇艺",
-                            "qq",
-                            "qq 预告及花絮",
-                            "腾讯",
-                            "youku",
-                            "优酷",
-                            "pptv",
-                            "PPTV",
-                            "letv",
-                            "乐视",
-                            "leshi",
-                            "mgtv",
-                            "芒果",
-                            "sohu",
-                            "xigua",
-                            "fun",
-                            "风行"
-                        ]
-                    },
-                    header: {
-                        "User-Agent": "Mozilla/5.0"
+                    let jxObject = {
+                        type: 1, // 固定值
+                        ext: {
+                            flag: [
+                                "qiyi",
+                                "imgo",
+                                "爱奇艺",
+                                "奇艺",
+                                "qq",
+                                "qq 预告及花絮",
+                                "腾讯",
+                                "youku",
+                                "优酷",
+                                "pptv",
+                                "PPTV",
+                                "letv",
+                                "乐视",
+                                "leshi",
+                                "mgtv",
+                                "芒果",
+                                "sohu",
+                                "xigua",
+                                "fun",
+                                "风行"
+                            ]
+                        },
+                        header: {
+                            "User-Agent": "Mozilla/5.0"
+                        }
+                    };
+                    try {
+                        let _jxObject = await drpyS.getJx(path.join(jxDir, file));
+                        jxObject = {...jxObject, ..._jxObject};
+                    } catch (e) {
+                        throw new Error(`Error parsing jx object for file: ${file}, ${e.message}`);
                     }
-                };
-                try {
-                    let _jxObject = await drpyS.getJx(path.join(jxDir, file));
-                    jxObject = {...jxObject, ..._jxObject};
-                } catch (e) {
-                    throw new Error(`Error parsing jx object for file: ${file}, ${e.message}`);
+
+                    parses.push({
+                        name: baseName,
+                        url: jxObject.url || api,
+                        type: jxObject.type,
+                        ext: jxObject.ext,
+                        header: jxObject.header
+                    });
+                },
+                param: {file, jxDir, requestHost, drpyS},
+                id: file,
+            };
+        });
+
+        const listener = {
+            func: (param, id, error, result) => {
+                if (error) {
+                    console.error(`Error processing file ${id}:`, error.message);
+                } else {
+                    // console.log(`Successfully processed file ${id}:`, result);
                 }
-
-                parses.push({
-                    name: baseName,
-                    url: jxObject.url || api,
-                    type: jxObject.type,
-                    ext: jxObject.ext,
-                    header: jxObject.header
-                });
             },
-            param: {file, jxDir, requestHost, drpyS},
-            id: file,
+            param: {}, // 外部参数可以在这里传入
         };
-    });
-
-    const listener = {
-        func: (param, id, error, result) => {
-            if (error) {
-                console.error(`Error processing file ${id}:`, error.message);
-            } else {
-                // console.log(`Successfully processed file ${id}:`, result);
-            }
-        },
-        param: {}, // 外部参数可以在这里传入
-    };
-    await batchExecute(tasks, listener);
-    let sorted_parses = naturalSort(parses, 'name', ['JSON并发', 'JSON合集', '虾米', '奇奇']);
+        await batchExecute(tasks, listener);
+        sorted_parses = naturalSort(parses, 'name', ['JSON并发', 'JSON合集', '虾米', '奇奇']);
+    }
     let sorted_jx_dict = naturalSort(jx_dict, 'name', ['J', 'W']);
     parses = sorted_parses.concat(sorted_jx_dict);
     return {parses};

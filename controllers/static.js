@@ -46,7 +46,7 @@ export default (fastify, options, done) => {
 
     fastify.register(addSPARoutes, {
         appsDir: options.appsDir,
-        spaApps: ['drplayer'] // 只有drplayer需要SPA路由支持
+        spaApps: ['drplayer', 'admin'] // 支持SPA路由的应用
     });
 
     // 注册JSON配置文件服务 - 用于存放各种JSON格式的配置文件
@@ -74,6 +74,19 @@ export default (fastify, options, done) => {
         setHeaders: (res, path) => {
             // 为Python文件设置正确的Content-Type，确保浏览器以纯文本形式显示
             if (path.endsWith('.py')) {
+                res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+            }
+        }
+    });
+
+    // 注册PHP脚本文件服务 - 用于存放PHP相关的脚本文件
+    fastify.register(fastifyStatic, {
+        root: options.phpDir,             // PHP脚本根目录
+        prefix: '/php/',                  // URL访问前缀
+        decorateReply: false,             // 禁用 sendFile 装饰器
+        setHeaders: (res, path) => {
+            // 为PHP文件设置正确的Content-Type，确保浏览器以纯文本形式显示
+            if (path.endsWith('.php')) {
                 res.setHeader('Content-Type', 'text/plain; charset=utf-8')
             }
         }

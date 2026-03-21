@@ -1,7 +1,9 @@
+import { PROJECT_ROOT } from './pathHelper.js';
 import fs from "fs";
 import path from "path";
 import {spawn} from "child_process";
 import {fileURLToPath, pathToFileURL} from "url";
+import {ensureExecutable} from "./binHelper.js";
 
 // 获取 pluginManager.js 的目录
 const __filename = fileURLToPath(import.meta.url);
@@ -14,7 +16,7 @@ const exampleConfigPath = path.join(__dirname, "../.plugins.example.js");
 // 尝试加载用户配置，如果没有就用 example
 let plugins = [];
 try {
-    console.log(`检查插件配置文件: ${userConfigPath} 是否存在`);
+    // console.log(`检查插件配置文件: ${userConfigPath} 是否存在`);
     if (fs.existsSync(userConfigPath)) {
         plugins = (await import(pathToFileURL(userConfigPath).href)).default;
         console.log("[pluginManager] 使用用户 .plugins.js 配置");
@@ -52,22 +54,6 @@ function getPluginBinary(rootDir, pluginPath, pluginName) {
     }
 
     return path.join(binDir, binaryName);
-}
-
-function ensureExecutable(filePath) {
-    if (process.platform === "win32") {
-        // Windows 不需要 chmod，直接返回
-        return;
-    }
-    try {
-        const stats = fs.statSync(filePath);
-        if (!(stats.mode & 0o111)) {
-            fs.chmodSync(filePath, 0o755);
-            console.log(`[pluginManager] 已为插件 ${filePath} 添加执行权限`);
-        }
-    } catch (err) {
-        console.error(`[pluginManager] 无法设置执行权限: ${filePath}`, err.message);
-    }
 }
 
 /**
@@ -150,7 +136,7 @@ function getProcessKey(plugin, index) {
  * 启动所有插件
  * @param {string} rootDir 项目根目录
  */
-export function startAllPlugins(rootDir = process.cwd()) {
+export function startAllPlugins(rootDir = PROJECT_ROOT) {
     console.log("[pluginManager] 准备启动所有插件...");
     const processes = {};
     const inactivePlugins = [];
